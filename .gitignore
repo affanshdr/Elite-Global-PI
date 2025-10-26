@@ -1,0 +1,21 @@
+# Abaikan folder dataset dan indexdir
+dataset/
+indexdir/
+
+# (opsional) abaikan file temporary dan cache umum
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# (opsional) abaikan virtual environment
+venv/
+.env/
+
+# (opsional) abaikan file dari editor
+.vscode/
+.idea/
+
+# (opsional) abaikan file sistem
+.DS_Store
+Thumbs.db
