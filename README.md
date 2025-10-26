@@ -3,7 +3,7 @@
 1. Install dependencies:
    `pip install -r requirements.txt`
 
-2. Pastikan folder dataset ada dengan struktur yang benar
+2. Ekstrak `dataset.zip` sebelum menjalankan program.
 
 3. Jalankan program:
    `python main.py`
