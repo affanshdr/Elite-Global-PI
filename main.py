@@ -39,14 +39,16 @@ class IRSystem:
         # Case Folding
         text = text.lower()
 
-        # Hapus non-alphabet
-        text = re.sub(r'[^a-zA-Z\s]', ' ', text)
+        # Hapus karakter selain huruf, angka, dan spasi
+        text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
 
         # Tokenisasi
         tokens = text.split()
 
         # Hapus stopwords
-        tokens = [token for token in tokens if token not in self.stopwords and len(token) > 2]
+        # Hapus stopwords tapi pertahankan semua angka
+        tokens = [token for token in tokens 
+          if token not in self.stopwords and (len(token) > 2 or token.isdigit())]
 
         return ' '.join(tokens)
     
@@ -140,7 +142,7 @@ class IRSystem:
         print("\nMembuat BoW vectors...")
         
         texts = [doc['preprocessed'] for doc in self.documents]
-        self.vectorizer = CountVectorizer(max_features=5000, min_df=2)
+        self.vectorizer = CountVectorizer(max_features=5000, min_df=1)
         self.doc_vectors = self.vectorizer.fit_transform(texts)
         
         print(f"BoW vectors brehasil dibuat: {self.doc_vectors.shape[1]} fitur")
@@ -156,6 +158,24 @@ class IRSystem:
         print(f"\nQuery: {query}")
         print(f"Processed: {processed_query}")
         
+        # === TAMBAHKAN DEBUG INI ===
+        print(f"\n[DEBUG] Query terms: {processed_query.split()}")
+
+        # Cek apakah term ada di vocabulary
+        query_terms = processed_query.split()
+        for term in query_terms:
+            if term in self.vectorizer.vocabulary_:
+                print(f"  ✓ '{term}' ADA di vocabulary (index: {self.vectorizer.vocabulary_[term]})")
+            else:
+                print(f"  ✗ '{term}' TIDAK ADA di vocabulary")
+
+        # Cek query vector
+        query_vector = self.vectorizer.transform([processed_query])
+        print(f"\n[DEBUG] Query vector sum: {query_vector.sum()}")
+        print(f"[DEBUG] Query vector non-zero: {query_vector.nnz}")
+        # === END DEBUG ===
+
+
         # Whoosh search
         ix = index.open_dir(self.index_dir)
         
@@ -203,7 +223,7 @@ class IRSystem:
         print(f"{'='*80}\n")
         
         for i, result in enumerate(results, 1):
-            print(f"[{i}] Skor: {result['similarity']:.4f}")
+            print(f"[{i}] Skor: {result['similarity']:.16f}")
             print(f"    Sumber: {result['source']}")
             print(f"    Judul: {result['judul'][:100]}...")
             print(f"    Konten: {result['konten'][:150]}...")
